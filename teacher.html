@@ -447,7 +447,7 @@ body {
 
 </style>
 <script>
-const GAS_URL = 'YOUR_GAS_DEPLOYMENT_URL_HERE';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwwx6KoClB_kwvEOC4-5lQcQgh6J8n0xm1x3SI33EHxzhc5PXugKlrVsNSdUnDjZDVZ/exec';
 const Session = {
   get: () => { try { return JSON.parse(sessionStorage.getItem('ve_user')||'null'); } catch(e){ return null; } },
   set: (d) => sessionStorage.setItem('ve_user', JSON.stringify(d)),

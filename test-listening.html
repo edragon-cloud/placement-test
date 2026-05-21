@@ -446,7 +446,7 @@ body {
 
 </style>
 <script>
-const GAS_URL='YOUR_GAS_DEPLOYMENT_URL_HERE';
+const GAS_URL='https://script.google.com/macros/s/AKfycbwwx6KoClB_kwvEOC4-5lQcQgh6J8n0xm1x3SI33EHxzhc5PXugKlrVsNSdUnDjZDVZ/exec';
 const Session={get:()=>{try{return JSON.parse(sessionStorage.getItem('ve_user')||'null');}catch(e){return null;}},set:(d)=>sessionStorage.setItem('ve_user',JSON.stringify(d)),clear:()=>sessionStorage.removeItem('ve_user'),require:(to)=>{var u=Session.get();if(!u){location.href=(to||'login.html');return null;}return u;},tGet:()=>sessionStorage.getItem('ve_teacher'),tSet:(p)=>sessionStorage.setItem('ve_teacher',p),tClear:()=>sessionStorage.removeItem('ve_teacher'),tRequire:()=>{var p=sessionStorage.getItem('ve_teacher');if(!p){location.href='teacher.html';return null;}return p;}};
 async function api(action,payload,msg){payload=payload||{};msg=msg||'Đang xử lý...';showLoading(true,msg);try{var r=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(Object.assign({action:action},payload)),redirect:'follow'});return await r.json();}catch(e){return{ok:false,error:'Lỗi kết nối: '+e.message};}finally{showLoading(false);}}
 function showLoading(on,msg){var el=document.getElementById('ov');if(!el)return;document.getElementById('ovMsg').textContent=msg||'Đang xử lý...';el.style.display=on?'flex':'none';}

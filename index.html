@@ -447,7 +447,7 @@ body {
 
 </style>
 <script>
-const GAS_URL = 'YOUR_GAS_DEPLOYMENT_URL_HERE';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwwx6KoClB_kwvEOC4-5lQcQgh6J8n0xm1x3SI33EHxzhc5PXugKlrVsNSdUnDjZDVZ/exec';
 const Session = {
   get: () => { try { return JSON.parse(sessionStorage.getItem('ve_user')||'null'); } catch(e){ return null; } },
   set: (d) => sessionStorage.setItem('ve_user', JSON.stringify(d)),
@@ -531,12 +531,13 @@ function hideErr(id) { var el=document.getElementById(id); if(el) el.style.displ
         </div>
       </div>
       <div class="field">
-        <label>7. Bạn học tiếng Anh ở đâu?</label>
-        <div class="pills" id="q7">
-          <div class="pill" data-v="School">Trường học</div>
-          <div class="pill" data-v="Tutor">Gia sư</div>
-          <div class="pill" data-v="Center">Trung tâm</div>
-          <div class="pill" data-v="Self">Tự học</div>
+        <label>7. Bạn học tiếng Anh ở đâu? (chọn tất cả phù hợp)</label>
+        <div class="checks" id="q7">
+          <div class="chk" data-v="School">Trường học</div>
+          <div class="chk" data-v="Tutor">Gia sư</div>
+          <div class="chk" data-v="Center">Trung tâm</div>
+          <div class="chk" data-v="Self">Tự học</div>
+          <div class="chk chk-all" data-v="all7" onclick="selectAll('q7',this)">✓ Tất cả</div>
         </div>
       </div>
       <div class="field">
@@ -557,12 +558,13 @@ function hideErr(id) { var el=document.getElementById(id); if(el) el.style.displ
         </div>
       </div>
       <div class="field">
-        <label>10. Học đọc &amp; viết tiếng Anh từ đâu? *</label>
-        <div class="pills" id="q10">
-          <div class="pill" data-v="School">Trường học</div>
-          <div class="pill" data-v="Family">Gia đình</div>
-          <div class="pill" data-v="Tutor">Gia sư</div>
-          <div class="pill" data-v="Self">Tự học</div>
+        <label>10. Học đọc &amp; viết tiếng Anh từ đâu? * (chọn tất cả phù hợp)</label>
+        <div class="checks" id="q10">
+          <div class="chk" data-v="School">Trường học</div>
+          <div class="chk" data-v="Family">Gia đình</div>
+          <div class="chk" data-v="Tutor">Gia sư</div>
+          <div class="chk" data-v="Self">Tự học</div>
+          <div class="chk chk-all" data-v="all10" onclick="selectAll('q10',this)">✓ Tất cả</div>
         </div>
       </div>
       <div class="field">
@@ -611,7 +613,7 @@ function hideErr(id) { var el=document.getElementById(id); if(el) el.style.displ
   <div id="s3" style="display:none">
     <div class="card">
       <div class="card-title">Tự đánh giá kỹ năng</div>
-      <div class="card-sub">Skills Self-Assessment · Câu 14–18</div>
+      <div class="card-sub">Skills Self-Assessment · Câu 14–20</div>
 
       <div class="field">
         <label>14. Khả năng nói tiếng Anh? *</label>
@@ -642,8 +644,29 @@ function hideErr(id) { var el=document.getElementById(id); if(el) el.style.displ
         <textarea id="q17" placeholder="Ví dụ: Tôi cần IELTS 6.5 để xin học bổng du học..."></textarea>
       </div>
       <div class="field">
-        <label>18. Bạn có câu hỏi gì về khóa học không? *</label>
-        <textarea id="q18" placeholder="Ghi câu hỏi của bạn (nếu không có, viết: Chưa có câu hỏi)"></textarea>
+        <label>18. Mục tiêu điểm IELTS của bạn? *</label>
+        <div class="pills" id="q18">
+          <div class="pill" data-v="4.0–4.5">4.0–4.5</div>
+          <div class="pill" data-v="5.0–5.5">5.0–5.5</div>
+          <div class="pill" data-v="6.0–6.5">6.0–6.5</div>
+          <div class="pill" data-v="7.0–7.5">7.0–7.5</div>
+          <div class="pill" data-v="8.0+">8.0+</div>
+          <div class="pill" data-v="Chưa xác định">Chưa xác định</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>19. Bạn dự định thi IELTS vào thời gian nào? *</label>
+        <div class="pills" id="q19">
+          <div class="pill" data-v="1-3 tháng tới">1–3 tháng tới</div>
+          <div class="pill" data-v="3-6 tháng tới">3–6 tháng tới</div>
+          <div class="pill" data-v="6-12 tháng tới">6–12 tháng tới</div>
+          <div class="pill" data-v="Trên 1 năm">Trên 1 năm</div>
+          <div class="pill" data-v="Chưa xác định">Chưa xác định</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>20. Bạn có câu hỏi gì về khóa học không? *</label>
+        <textarea id="q20" placeholder="Ghi câu hỏi của bạn (nếu không có, viết: Chưa có câu hỏi)"></textarea>
       </div>
 
       <div id="e3" class="al-error" style="display:none"></div>
@@ -710,19 +733,39 @@ function next1() {
 
 function next2() {
   hideErr('e2');
-  if(!getPill('q6')||!getPill('q8')||!getPill('q9')||!getPill('q10')||!getPill('q13')){
-    showErr('e2','Vui lòng trả lời tất cả câu hỏi bắt buộc.'); return; }
+  if(!getPill('q6')||!getPill('q8')||!getPill('q9')||!getPill('q13')){
+    showErr('e2','Vui lòng trả lời tất cả câu hỏi bắt buộc (câu 6, 8, 9, 13).'); return; }
   if(!getChks('q11')){ showErr('e2','Câu 11: vui lòng chọn ít nhất 1 mục.'); return; }
   if(!getChks('q12')){ showErr('e2','Câu 12: vui lòng chọn ít nhất 1 mục.'); return; }
   setStep(3);
+}
+
+// Chọn tất cả options trong 1 checks group
+function selectAll(groupId, btn) {
+  var group = document.getElementById(groupId);
+  var isAllOn = btn.classList.contains('on');
+  if (isAllOn) {
+    // Bỏ chọn tất cả
+    group.querySelectorAll('.chk:not(.chk-all)').forEach(function(c){ c.classList.remove('on'); });
+    btn.classList.remove('on');
+  } else {
+    // Chọn tất cả
+    group.querySelectorAll('.chk:not(.chk-all)').forEach(function(c){ c.classList.add('on'); });
+    btn.classList.add('on');
+  }
 }
 
 async function submitSurvey() {
   hideErr('e3');
   var q14=getPill('q14'), q15=getPill('q15'), q16=getPill('q16');
   var q17=document.getElementById('q17').value.trim();
-  var q18=document.getElementById('q18').value.trim();
-  if(!q14||!q15||!q16||!q17||!q18){ showErr('e3','Vui lòng trả lời đầy đủ tất cả câu hỏi.'); return; }
+  var q18=getPill('q18');
+  var q19=getPill('q19');
+  var q20=document.getElementById('q20').value.trim();
+  if(!q14||!q15||!q16||!q17){ showErr('e3','Vui lòng trả lời câu 14–17.'); return; }
+  if(!q18){ showErr('e3','Câu 18: vui lòng chọn mục tiêu điểm.'); return; }
+  if(!q19){ showErr('e3','Câu 19: vui lòng chọn thời gian dự định thi.'); return; }
+  if(!q20){ showErr('e3','Câu 20: vui lòng điền câu hỏi (hoặc ghi "Chưa có câu hỏi").'); return; }
 
   var dobRaw = document.getElementById('q_dob').value;
   var parts = dobRaw.split('-');
@@ -734,11 +777,12 @@ async function submitSurvey() {
     dob: dob,
     phone: document.getElementById('q_phone').value.trim(),
     school: document.getElementById('q_school').value.trim(),
-    studiedBefore: getPill('q6'), whereStudied: getPill('q7'),
-    yearsLearning: getPill('q8'), rwDifficulty: getPill('q9'), rwSource: getPill('q10'),
+    studiedBefore: getPill('q6'), whereStudied: getChks('q7'),
+    yearsLearning: getPill('q8'), rwDifficulty: getPill('q9'), rwSource: getChks('q10'),
     writingTypes: getChks('q11'), certificates: getChks('q12'),
     listeningAbility: getPill('q13'), speakingAbility: q14,
-    readingAbility: q15, writingAbility: q16, whyIELTS: q17, courseQuestions: q18
+    readingAbility: q15, writingAbility: q16,
+    whyIELTS: q17, targetBand: q18, examDate: q19, courseQuestions: q20
   }, 'Đang tạo tài khoản...');
 
   if(!res.ok){ showErr('e3', res.error); return; }

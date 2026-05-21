@@ -508,11 +508,15 @@ function daysLeft(dl){if(!dl)return 0;var a=dl.split('/');return Math.ceil((new 
     </div>
   </nav>
 
-  <div class="wrap-lg">
-    <!-- Stats -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px" id="statsRow"></div>
+  <!-- Tab buttons -->
+  <div style="background:var(--white);border-bottom:1px solid var(--border);padding:0 20px;display:flex;gap:4px">
+    <button class="tab-btn active" id="tab-students" onclick="switchTab('students')">👥 Thí sinh</button>
+    <button class="tab-btn" id="tab-questions" onclick="switchTab('questions')">📝 Câu hỏi & Đề bài</button>
+  </div>
 
-    <!-- Filter -->
+  <!-- TAB 1: Students -->
+  <div id="tabStudents" class="wrap-lg">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;margin-top:16px" id="statsRow"></div>
     <div class="card" style="padding:14px 16px;margin-bottom:12px">
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <input type="text" id="srch" placeholder="🔍 Tìm tên / username..."
@@ -528,7 +532,6 @@ function daysLeft(dl){if(!dl)return 0;var a=dl.split('/');return Math.ceil((new 
         <button class="btn btn-ghost btn-sm" onclick="loadDash()">↻ Làm mới</button>
       </div>
     </div>
-
     <div class="card" style="overflow-x:auto;padding:0">
       <table class="tbl" id="studTbl">
         <thead><tr>
@@ -541,11 +544,53 @@ function daysLeft(dl){if(!dl)return 0;var a=dl.split('/');return Math.ceil((new 
       <div id="noData" style="display:none;text-align:center;padding:24px;color:var(--text-lt)">Không có dữ liệu</div>
     </div>
   </div>
+
+  <!-- TAB 2: Questions & Topics -->
+  <div id="tabQuestions" class="wrap-lg" style="display:none">
+
+    <!-- Speaking Questions -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">🎙️ Câu hỏi Speaking</div>
+      <div class="card-sub">Thứ tự sẽ hiển thị cho thí sinh. Tích vào ô "Ẩn" để tạm thời bỏ câu đó.</div>
+      <div id="sqList"></div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="addSQ()">+ Thêm câu hỏi</button>
+        <button class="btn btn-primary btn-sm" onclick="saveSQ()">💾 Lưu câu hỏi Speaking</button>
+      </div>
+      <div id="sqMsg" style="display:none;margin-top:8px;font-size:13px;color:var(--green)"></div>
+    </div>
+
+    <!-- Writing Topics -->
+    <div class="card">
+      <div class="card-title">✍️ Đề bài Writing</div>
+      <div class="card-sub">Thí sinh sẽ chọn 1 trong các đề này để viết bài.</div>
+      <div id="wtList"></div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="addWT()">+ Thêm đề bài</button>
+        <button class="btn btn-primary btn-sm" onclick="saveWT()">💾 Lưu đề bài Writing</button>
+      </div>
+      <div id="wtMsg" style="display:none;margin-top:8px;font-size:13px;color:var(--green)"></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
 var allStudents = [];
 var tPwd = '';
+
+// ── Tab CSS ──
+var tabStyle = document.createElement('style');
+tabStyle.textContent = '.tab-btn{padding:10px 18px;border:none;background:transparent;cursor:pointer;font-size:14px;font-weight:600;color:var(--text-md);border-bottom:3px solid transparent;font-family:"Source Sans 3",sans-serif;transition:all .15s;}.tab-btn.active{color:var(--navy);border-bottom-color:var(--navy);}.tab-btn:hover{color:var(--navy);}';
+document.head.appendChild(tabStyle);
+
+function switchTab(name) {
+  document.getElementById('tabStudents').style.display = name==='students' ? 'block' : 'none';
+  document.getElementById('tabQuestions').style.display = name==='questions' ? 'block' : 'none';
+  document.getElementById('tab-students').classList.toggle('active', name==='students');
+  document.getElementById('tab-questions').classList.toggle('active', name==='questions');
+  if (name==='questions') loadQuestionsTab();
+}
 
 // Auto-login from session
 var saved = Session.tGet();
@@ -639,6 +684,137 @@ function renderTbl(list) {
       +'<td><a href="teacher-detail.html?u='+encodeURIComponent(s.username)+'" class="btn btn-outline btn-sm">Xem →</a></td>'
       +'</tr>';
   }).join('');
+}
+
+// ════════════════════════════════════════
+// QUESTIONS & TOPICS MANAGEMENT
+// ════════════════════════════════════════
+var sqData = [];  // Speaking questions
+var wtData = [];  // Writing topics
+
+async function loadQuestionsTab() {
+  // Load Speaking Questions
+  var sqRes = await api('getQuestions', {});
+  if (sqRes.ok) {
+    sqData = sqRes.questions || [];
+  } else {
+    sqData = [];
+  }
+  renderSQ();
+
+  // Load Writing Topics
+  var wtRes = await api('getTopics', {});
+  if (wtRes.ok) {
+    wtData = wtRes.topics || [];
+  } else {
+    wtData = [];
+  }
+  renderWT();
+}
+
+// ── SPEAKING QUESTIONS ──
+function renderSQ() {
+  var html = '';
+  sqData.forEach(function(q, i) {
+    html += '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;padding:12px;background:var(--cream);border-radius:var(--r-sm)">'
+      + '<span style="font-weight:700;color:var(--navy);min-width:22px;margin-top:10px">'+(i+1)+'.</span>'
+      + '<textarea id="sq_'+i+'" style="flex:1;padding:9px 12px;border:1.5px solid var(--border-md);border-radius:var(--r-sm);font-family:\'Source Sans 3\',sans-serif;font-size:15px;resize:vertical;min-height:70px;outline:none">'+q.question+'</textarea>'
+      + '<div style="display:flex;flex-direction:column;gap:6px;align-items:center;padding-top:6px">'
+      + '<label style="font-size:11px;color:var(--text-lt);cursor:pointer"><input type="checkbox" id="sqActive_'+i+'"'+(q.active!==false?' checked':'')+'> Hiện</label>'
+      + '<button class="btn btn-ghost btn-sm" onclick="removeSQ('+i+')" style="padding:4px 10px;font-size:12px;color:var(--red)">✕</button>'
+      + '</div>'
+      + '</div>';
+  });
+  document.getElementById('sqList').innerHTML = html || '<p style="color:var(--text-lt);font-size:14px">Chưa có câu hỏi. Nhấn "+ Thêm" để thêm.</p>';
+}
+
+function addSQ() {
+  sqData.push({question:'', active:true});
+  renderSQ();
+  var lastTextarea = document.querySelector('#sq_'+(sqData.length-1));
+  if (lastTextarea) lastTextarea.focus();
+}
+
+function removeSQ(i) {
+  sqData.splice(i, 1);
+  renderSQ();
+}
+
+async function saveSQ() {
+  // Collect from DOM
+  var questions = [];
+  sqData.forEach(function(q, i) {
+    var ta = document.getElementById('sq_'+i);
+    var cb = document.getElementById('sqActive_'+i);
+    if (ta && ta.value.trim()) {
+      questions.push({question: ta.value.trim(), active: cb ? cb.checked : true});
+    }
+  });
+  if (questions.length === 0) { alert('Vui lòng thêm ít nhất 1 câu hỏi.'); return; }
+  var res = await api('saveQuestions', {password: tPwd, questions: questions});
+  var msg = document.getElementById('sqMsg');
+  if (res.ok) {
+    msg.textContent = '✅ Đã lưu ' + questions.length + ' câu hỏi Speaking!';
+    msg.style.display = 'block';
+    sqData = questions;
+    setTimeout(function(){ msg.style.display='none'; }, 3000);
+  } else {
+    alert('Lỗi: ' + res.error);
+  }
+}
+
+// ── WRITING TOPICS ──
+function renderWT() {
+  var html = '';
+  wtData.forEach(function(t, i) {
+    html += '<div style="background:var(--cream);border-radius:var(--r-sm);padding:14px;margin-bottom:12px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      + '<strong style="color:var(--navy);font-size:14px">Đề '+(i+1)+'</strong>'
+      + '<div style="display:flex;gap:10px;align-items:center">'
+      + '<label style="font-size:12px;color:var(--text-lt);cursor:pointer"><input type="checkbox" id="wtActive_'+i+'"'+(t.active!==false?' checked':'')+'> Hiện</label>'
+      + '<button class="btn btn-ghost btn-sm" onclick="removeWT('+i+')" style="padding:4px 10px;font-size:12px;color:var(--red)">✕ Xóa</button>'
+      + '</div></div>'
+      + '<div class="field" style="margin-bottom:8px"><label style="font-size:11px">Tên đề bài</label>'
+      + '<input type="text" id="wtTitle_'+i+'" value="'+t.title.replace(/"/g,'&quot;')+'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border-md);border-radius:var(--r-sm);font-size:14px;font-family:\'Source Sans 3\',sans-serif;outline:none"></div>'
+      + '<div class="field" style="margin:0"><label style="font-size:11px">Mô tả / Yêu cầu đề bài</label>'
+      + '<textarea id="wtDesc_'+i+'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border-md);border-radius:var(--r-sm);font-size:13px;font-family:\'Source Sans 3\',sans-serif;resize:vertical;min-height:80px;outline:none">'+t.description+'</textarea>'
+      + '</div></div>';
+  });
+  document.getElementById('wtList').innerHTML = html || '<p style="color:var(--text-lt);font-size:14px">Chưa có đề bài. Nhấn "+ Thêm" để thêm.</p>';
+}
+
+function addWT() {
+  wtData.push({title:'', description:'', active:true});
+  renderWT();
+  document.querySelector('#wtTitle_'+(wtData.length-1)).focus();
+}
+
+function removeWT(i) {
+  wtData.splice(i, 1);
+  renderWT();
+}
+
+async function saveWT() {
+  var topics = [];
+  wtData.forEach(function(t, i) {
+    var title = (document.getElementById('wtTitle_'+i)||{}).value||'';
+    var desc  = (document.getElementById('wtDesc_'+i)||{}).value||'';
+    var cb    = document.getElementById('wtActive_'+i);
+    if (title.trim()) {
+      topics.push({title:title.trim(), description:desc.trim(), active:cb?cb.checked:true});
+    }
+  });
+  if (topics.length === 0) { alert('Vui lòng thêm ít nhất 1 đề bài.'); return; }
+  var res = await api('saveTopics', {password: tPwd, topics: topics});
+  var msg = document.getElementById('wtMsg');
+  if (res.ok) {
+    msg.textContent = '✅ Đã lưu ' + topics.length + ' đề bài Writing!';
+    msg.style.display = 'block';
+    wtData = topics;
+    setTimeout(function(){ msg.style.display='none'; }, 3000);
+  } else {
+    alert('Lỗi: ' + res.error);
+  }
 }
 </script>
 </body>

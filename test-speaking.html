@@ -907,7 +907,7 @@ function hideErr(id){var el=document.getElementById(id);if(el)el.style.display='
 
   <!-- Phase 0: Instructions -->
   <div class="phase on" id="ph0">
-    <div class="alert al-info show" style="margin-bottom:16px">🎙️ Phần thi Nói gồm <strong>5 câu hỏi</strong>. Bạn có 1 phút chuẩn bị, sau đó ghi âm và trả lời tất cả 5 câu trong <strong>một lần ghi âm liên tục</strong>.</div>
+    <div class="alert al-info show" style="margin-bottom:16px">🎙️ Phần thi Nói gồm 5 câu hỏi. Bạn có 1 phút chuẩn bị, sau đó ghi âm và trả lời tất cả 5 câu trong một lần ghi âm liên tục.</div>
     <div class="card">
       <div class="card-title">Hướng dẫn</div>
       <div class="card-sub">Trước khi bắt đầu, hãy đảm bảo:</div>
@@ -971,25 +971,38 @@ function hideErr(id){var el=document.getElementById(id);if(el)el.style.display='
 var user = Session.require();
 if (user && user.speakingDone) location.href = 'dashboard.html';
 
-// ── QUESTIONS (placeholder — update when ready) ──
-var QS = [
-  "Talk about yourself: your name, where you're from, what you do, and your hobbies.",
-  "Describe your hometown. What do you like or dislike about it?",
-  "Talk about a subject you enjoyed studying at school and explain why you enjoyed it.",
-  "Describe a person who has been important in your life and explain why they are important to you.",
-  "Talk about something you enjoy doing in your free time. How often do you do it and why?",
-];
+// ── Load questions from GAS ──
+var QS = [];
 
-var qHtml = QS.map(function(q,i){
-  return '<div style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,.15);font-size:13px;line-height:1.5"><strong>'+(i+1)+'.</strong> '+q+'</div>';
-}).join('');
-var qHtmlDark = QS.map(function(q,i){
-  return '<div style="padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;line-height:1.5"><strong style="color:var(--navy)">'+(i+1)+'.</strong> '+q+'</div>';
-}).join('');
+async function loadSpeakingQuestions() {
+  var res = await api('getQuestions', {});
+  if (res.ok && res.questions && res.questions.length > 0) {
+    QS = res.questions.map(function(q){ return q.question; });
+  } else {
+    // Fallback nếu chưa có câu hỏi trong Sheet
+    QS = [
+      "Talk about yourself: your name, where you're from, what you do, and your hobbies.",
+      "Describe your hometown. What do you like or dislike about it?",
+      "Talk about a subject you enjoyed studying at school and explain why you enjoyed it.",
+      "Describe a person who has been important in your life and explain why they are important to you.",
+      "Talk about something you enjoy doing in your free time. How often do you do it and why?",
+    ];
+  }
+  var count = QS.length;
+  var qHtmlDark = QS.map(function(q,i){
+    return '<div style="padding:12px 0;border-bottom:1px solid var(--border);font-size:19px;line-height:1.6"><strong style="color:var(--navy)">'+(i+1)+'.</strong> '+q+'</div>';
+  }).join('');
+  var qHtml = QS.map(function(q,i){
+    return '<div style="padding:12px 0;border-bottom:1px solid rgba(255,255,255,.2);font-size:19px;line-height:1.6"><strong>'+(i+1)+'.</strong> '+q+'</div>';
+  }).join('');
+  document.getElementById('qPreview').innerHTML = qHtmlDark;
+  document.getElementById('qPrep').innerHTML = qHtmlDark;
+  document.getElementById('qRec').innerHTML = qHtml;
+  // Update count in instruction
+  document.querySelectorAll('.q-count').forEach(function(el){ el.textContent = count; });
+}
 
-document.getElementById('qPreview').innerHTML = qHtmlDark;
-document.getElementById('qPrep').innerHTML = qHtmlDark;
-document.getElementById('qRec').innerHTML = qHtml;
+loadSpeakingQuestions();
 
 var prepTimer = null;
 var prepSec = 60;

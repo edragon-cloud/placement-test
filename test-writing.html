@@ -465,7 +465,7 @@ function hideErr(id){var el=document.getElementById(id);if(el)el.style.display='
 
   <!-- Topic selection -->
   <div id="stTopic">
-    <div class="alert al-info show" style="margin-bottom:16px">✍️ Chọn <strong>một</strong> chủ đề và nhấn xác nhận. Sau khi xác nhận bạn không thể đổi chủ đề.</div>
+    <div class="alert al-info show" style="margin-bottom:16px">✍️ Chọn một chủ đề bên dưới và nhấn xác nhận. Sau khi xác nhận bạn không thể đổi chủ đề.</div>
     <div class="card">
       <div class="card-title">Chọn chủ đề bài viết</div>
       <div class="card-sub">Writing Placement Test · Chọn 1 trong 5 chủ đề bên dưới</div>
@@ -497,20 +497,32 @@ function hideErr(id){var el=document.getElementById(id);if(el)el.style.display='
 var user = Session.require();
 if (user && user.writingDone) location.href = 'dashboard.html';
 
-var TOPICS = [
-  {id:'t1',title:'1. Hồ sơ cá nhân (Personal Profile)',body:'Write a personal profile about yourself for a website where you can meet new internet friends. Answer: What is your name, age, etc.? Where are you from, and what do you do? What do you look like, and what sort of person are you? What are your interests and your likes/dislikes? What sort of new friends do you want to meet?'},
-  {id:'t2',title:'2. Email về đất nước (Your Country)',body:'Write an email to a friend from another part of the world who wants to know more about your country: how big it is, main cities, famous landmarks, language and culture, what the people are like, traditional food, music, dances. Finish by inviting your friend to visit.'},
-  {id:'t3',title:'3. Ký ức tuổi thơ (Childhood Memory)',body:'Write about a strong childhood memory – something that made you very happy or very frightened. Explain how old you were, where you were, tell the story of what happened. Include details such as sounds, smells, colours and weather. Explain how you felt and how you feel about it now.'},
-  {id:'t4',title:'4. Đánh giá phim / sách / kịch (Review)',body:'Write a review of your favourite film, play or book. Explain what type it is, where and when the story takes place, briefly describe what happens. Describe the main characters, say whether you like or dislike each and why. Explain why this is your favourite.'},
-  {id:'t5',title:'5. Thế giới tốt hơn hay tệ hơn? (World Article)',body:'Write an article discussing whether you think our world is getting better or getting worse. Include issues such as: medicine/science/technology, war/conflict, freedom/human rights, education, quality of life. Finish with a short conclusion summarising the main argument.'},
-];
-
+var TOPICS = [];
 var selected = null;
 
-document.getElementById('topicList').innerHTML = TOPICS.map(function(t){
-  return '<div class="topic-card" id="tc_'+t.id+'" onclick="pickT(\''+t.id+'\')">'
-    +'<h4>'+t.title+'</h4><p>'+t.body+'</p></div>';
-}).join('');
+async function loadTopics() {
+  document.getElementById('topicList').innerHTML = '<p style="color:var(--text-lt);font-size:14px">Đang tải đề bài...</p>';
+  var res = await api('getTopics', {});
+  if (res.ok && res.topics && res.topics.length > 0) {
+    TOPICS = res.topics.map(function(t,i){
+      return {id:'t'+(i+1), title:(i+1)+'. '+t.title, body:t.description};
+    });
+  } else {
+    TOPICS = [
+      {id:'t1',title:'1. Hồ sơ cá nhân (Personal Profile)',body:'Write a personal profile about yourself for a website. Include: name/age, where you are from and what you do, your interests and likes/dislikes, what kind of new friends you want to meet.'},
+      {id:'t2',title:'2. Email về đất nước',body:'Write an email to a friend who wants to know more about your country. Include geography, cities, culture, people, food and music. Invite them to visit.'},
+      {id:'t3',title:'3. Ký ức tuổi thơ',body:'Write about a strong childhood memory. Include details like sounds, smells, colours and weather. Explain how you felt then and how you feel about it now.'},
+      {id:'t4',title:'4. Đánh giá phim / sách',body:'Write a review of your favourite film, play or book. Describe the story, characters, and explain why this is your favourite.'},
+      {id:'t5',title:'5. Thế giới tốt hơn hay tệ hơn?',body:'Write an article about whether our world is getting better or worse. Include medicine, technology, conflict, freedom, education. Finish with a conclusion.'},
+    ];
+  }
+  document.getElementById('topicList').innerHTML = TOPICS.map(function(t){
+    return '<div class="topic-card" id="tc_'+t.id+'" onclick="pickT(\''+t.id+'\')">'
+      +'<h4>'+t.title+'</h4><p>'+t.body+'</p></div>';
+  }).join('');
+}
+
+loadTopics();
 
 function pickT(id){
   selected = TOPICS.find(function(t){return t.id===id;});

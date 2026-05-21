@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ngữ Pháp & Từ Vựng — Venus English</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -444,6 +445,114 @@ body {
 .ai-box table td { padding: 5px 8px; border-bottom: 1px solid var(--sky-dk); }
 .ai-box table td:first-child { font-weight: 700; width: 120px; color: var(--navy); white-space: nowrap; }
 
+
+/* ── 2-COLUMN TEST LAYOUT ── */
+.test-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 56px);
+}
+@media (max-width: 700px) {
+  .test-layout { grid-template-columns: 1fr; }
+  .nav-panel { display: none; }
+  .nav-panel.mobile-show { display: block; }
+}
+
+/* ── NAV PANEL (left) ── */
+.nav-panel {
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  padding: 16px 12px;
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+}
+.nav-panel-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--text-lt);
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.q-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  margin-bottom: 16px;
+}
+.q-nav-btn {
+  aspect-ratio: 1;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px; font-weight: 600;
+  background: var(--white);
+  cursor: pointer;
+  transition: all .15s;
+  color: var(--text-md);
+  display: flex; align-items: center; justify-content: center;
+}
+.q-nav-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--sky); }
+.q-nav-btn.answered { background: var(--teal); border-color: var(--teal); color: var(--white); }
+.q-nav-btn.current  { border-color: var(--navy); background: var(--navy); color: var(--white); box-shadow: 0 2px 8px rgba(26,53,87,.3); }
+
+/* Legend */
+.nav-legend { font-size: 11px; color: var(--text-lt); }
+.legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.legend-dot { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+
+/* Timer */
+.timer-box {
+  background: var(--navy);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.timer-label { font-size: 10px; color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
+.timer-value { font-family: 'Merriweather', serif; font-size: 22px; font-weight: 700; color: var(--white); letter-spacing: 1px; }
+.timer-warn .timer-value { color: var(--gold-lt); }
+
+/* Progress summary */
+.nav-progress { margin-bottom: 14px; }
+.nav-progress-bar { width: 100%; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.nav-progress-fill { height: 100%; background: var(--teal); border-radius: 3px; transition: width .3s; }
+.nav-progress-txt { font-size: 11px; color: var(--text-lt); display: flex; justify-content: space-between; margin-top: 3px; }
+
+/* ── MAIN CONTENT (right) ── */
+.main-content { padding: 20px; max-width: 760px; }
+
+/* Single question block (full width, scrollable) */
+.qblock-active {
+  animation: slideIn .25s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Nav buttons row */
+.q-nav-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 20px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+  gap: 10px;
+}
+
+/* Mobile nav toggle */
+.mobile-nav-toggle {
+  display: none;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Source Sans 3', sans-serif;
+}
+@media (max-width: 700px) { .mobile-nav-toggle { display: inline-flex; } }
 </style>
 <script>
 const GAS_URL='https://script.google.com/macros/s/AKfycbwwx6KoClB_kwvEOC4-5lQcQgh6J8n0xm1x3SI33EHxzhc5PXugKlrVsNSdUnDjZDVZ/exec';
@@ -456,26 +565,107 @@ function hideErr(id){var el=document.getElementById(id);if(el)el.style.display='
 </head>
 <body>
 <div id="ov" style="display:none"><div class="spinner"></div><p id="ovMsg">Đang nộp bài...</p></div>
-<nav class="nav">
-  <button class="btn btn-ghost btn-sm" onclick="goBack()">← Quay lại</button>
-  <div class="nav-brand"><div class="nav-brand-dot"></div>Ngữ Pháp & Từ Vựng</div>
-  <div class="nav-r"><span class="txt-sm" id="cnt">0/50</span></div>
-</nav>
-<div class="wrap">
-  <div class="alert al-info show" style="margin-bottom:16px">📋 50 câu trắc nghiệm · Chọn đáp án đúng nhất. Kết quả không hiển thị ngay — giáo viên sẽ tổng hợp sau.</div>
-  <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
-  <div id="qs"></div>
-  <div id="errSub" class="al-error" style="display:none"></div>
-  <div id="unanswered" style="display:none;font-size:12px;color:var(--text-lt);margin-bottom:10px"></div>
-  <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-    <span class="txt-sm">Đã trả lời: <strong id="cnt2">0</strong> / 50</span>
-    <button class="btn btn-primary" onclick="submitVG()">Nộp bài →</button>
+
+<!-- Sticky top nav -->
+<nav class="nav" style="position:sticky;top:0;z-index:200">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="btn btn-ghost btn-sm" onclick="goBack()">← Thoát</button>
+    <button class="mobile-nav-toggle" onclick="toggleMobileNav()">☰ Số câu</button>
   </div>
-</div>
+  <div class="nav-brand"><div class="nav-brand-dot"></div>Ngữ Pháp & Từ Vựng</div>
+  <div class="nav-r">
+    <span class="txt-sm" id="cnt" style="min-width:50px;text-align:right">0 / 50</span>
+  </div>
+</nav>
+
+<div class="test-layout">
+
+  <!-- ── LEFT NAV PANEL ── -->
+  <div class="nav-panel" id="navPanel">
+
+    <!-- Timer -->
+    <div class="timer-box" id="timerBox">
+      <div class="timer-label">Thời gian</div>
+      <div class="timer-value" id="timerVal">00:00</div>
+    </div>
+
+    <!-- Progress -->
+    <div class="nav-progress">
+      <div class="nav-progress-txt">
+        <span>Đã trả lời</span>
+        <span id="navPrgTxt">0 / 50</span>
+      </div>
+      <div class="nav-progress-bar">
+        <div class="nav-progress-fill" id="navPrgFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Question grid -->
+    <div class="nav-panel-title">Câu hỏi</div>
+    <div class="q-nav-grid" id="qNavGrid"></div>
+
+    <!-- Legend -->
+    <div class="nav-legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--teal)"></div>
+        <span>Đã trả lời</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--navy)"></div>
+        <span>Câu hiện tại</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--white);border:1.5px solid var(--border)"></div>
+        <span>Chưa trả lời</span>
+      </div>
+    </div>
+
+    <!-- Submit button -->
+    <button class="btn btn-primary btn-full" style="margin-top:16px" onclick="submitVG()">
+      Nộp bài →
+    </button>
+    <div id="navErrMsg" style="display:none;font-size:12px;color:var(--red);margin-top:8px;text-align:center"></div>
+  </div>
+
+  <!-- ── RIGHT: QUESTION CONTENT ── -->
+  <div class="main-content">
+    <div class="alert al-info show" style="margin-bottom:16px">
+      📋 50 câu trắc nghiệm · Chọn đáp án đúng nhất. Kết quả không hiển thị ngay — giáo viên sẽ tổng hợp sau.
+    </div>
+
+    <!-- Single question display -->
+    <div id="questionArea"></div>
+
+    <!-- Bottom nav row -->
+    <div class="q-nav-row">
+      <button class="btn btn-ghost" id="btnPrev" onclick="goPrev()">← Câu trước</button>
+      <span class="txt-sm" id="qPositionTxt" style="color:var(--text-lt)">Câu 1 / 50</span>
+      <button class="btn btn-primary btn-sm" id="btnNext" onclick="goNext()">Câu sau →</button>
+    </div>
+
+    <div id="submitErr" class="al-error" style="display:none;margin-top:16px"></div>
+  </div>
+
+</div><!-- /test-layout -->
+
 <script>
+
 var user = Session.require();
 if (user && user.vgDone) location.href = 'dashboard.html';
 
+// ── State ──
+var answers = {};
+var currentQ = 1;
+var totalQ = 50;
+var timerSec = 0;
+var timerInterval = null;
+var exitCount = 0;
+var pageHidden = false;
+
+// ── Track enter ──
+api('trackActivity', {username: user.username, testType:'vg', action:'enter', note:'Start session'});
+
+// ── VG Questions data ──
 var QS = [
   {n:1,q:"I'm 18 and my brother is 20, so he's ........ me.",o:["a. the oldest of","b. older than","c. as old as"]},
   {n:2,q:"Carl's very ........ He's never late, and he never forgets to do things.",o:["a. reliable","b. patient","c. strict"]},
@@ -502,13 +692,13 @@ var QS = [
   {n:23,q:"........ feeling OK? You don't look very well.",o:["a. Do you","b. You are","c. Are you"]},
   {n:24,q:"Daniel's hair is getting far too long; he should ........ soon.",o:["a. cut it","b. have cut it","c. have it cut"]},
   {n:25,q:"Mandy works for a computer software company. She got ........ recently, and so now she's an area manager.",o:["a. made redundant","b. promoted","c. a raise"]},
-  {n:26,q:"I can't hear you – it's ........ noisy in here.",o:["a. too","b. too much","c. too many"]},
+  {n:26,q:"I can't hear you — it's ........ noisy in here.",o:["a. too","b. too much","c. too many"]},
   {n:27,q:"Jamal has just sent me ........ to arrange plans for this weekend.",o:["a. a blog","b. an email","c. a website"]},
   {n:28,q:"I promise I'll call you as soon as I ........ .",o:["a. arrive","b. arrived","c. will arrive"]},
   {n:29,q:"Photographers and designers need to be very ........ .",o:["a. creative","b. fit","c. annoying"]},
   {n:30,q:"The global financial crisis, ........ is forcing lots of small businesses to close, does not look set to end soon.",o:["a. it","b. that","c. which"]},
   {n:31,q:"There ........ a terrible accident if the pilot hadn't reacted so quickly.",o:["a. had been","b. was","c. would have been"]},
-  {n:32,q:'"Are you ready to order?" "Not yet – I\'m still looking at the ........"',o:["a. bill","b. menu","c. service"]},
+  {n:32,q:'"Are you ready to order?" "Not yet — I\'m still looking at the ........"',o:["a. bill","b. menu","c. service"]},
   {n:33,q:'"My job is never boring." The speaker\'s job is always ........ .',o:["a. interesting","b. popular","c. difficult"]},
   {n:34,q:"I've been working here ........ about the last two years.",o:["a. during","b. for","c. since"]},
   {n:35,q:'"It leaves from Platform 2 at 4.15." The speaker is talking about ........ .',o:["a. an airline flight","b. a train","c. a taxi"]},
@@ -518,8 +708,8 @@ var QS = [
   {n:39,q:"The ........ in that country is very high, so most people can read and write.",o:["a. literacy rate","b. birth rate","c. mortality rate"]},
   {n:40,q:"I was sure I had put my keys somewhere, but I couldn't ........ them.",o:["a. find out","b. come across","c. find"]},
   {n:41,q:"The area used to be quite ........, but since the buildings were renovated, it's become quite fashionable.",o:["a. a trendy","b. a rundown","c. an affluent"]},
-  {n:42,q:"The news from the hospital isn't good – I hope she ........ soon.",o:["a. recovers","b. repairs","c. heals"]},
-  {n:43,q:"If only I ........ to him – things would have been so different.",o:["a. had listened","b. listened","c. would have listened"]},
+  {n:42,q:"The news from the hospital isn't good — I hope she ........ soon.",o:["a. recovers","b. repairs","c. heals"]},
+  {n:43,q:"If only I ........ to him — things would have been so different.",o:["a. had listened","b. listened","c. would have listened"]},
   {n:44,q:"The ........ from the concert hall was so great that we could hear it from our house.",o:["a. music","b. sound","c. noise"]},
   {n:45,q:"Scientists have made a significant ........ in the fight against malaria.",o:["a. breakthrough","b. investigation","c. discovery"]},
   {n:46,q:"I couldn't ........ the answer to the puzzle.",o:["a. check in","b. look up","c. work out"]},
@@ -529,56 +719,223 @@ var QS = [
   {n:50,q:"I wouldn't say the policy is wrong ........; I'd say it's badly timed.",o:["a. as such","b. by itself","c. in its own"]},
 ];
 
-var answers = {};
+// ── INIT ──
+buildNavGrid();
+showQuestion(1);
+startTimer();
 
-document.getElementById('qs').innerHTML = QS.map(function(q){
-  return '<div class="qblock" id="qb'+q.n+'">'
-    +'<div class="q-num">Câu '+q.n+'</div>'
-    +'<div class="q-text">'+q.q+'</div>'
-    +'<div class="q-opts">'
-    +q.o.map(function(opt,i){
-      var l=['a','b','c'][i];
-      return '<label class="q-opt" id="qo'+q.n+'_'+l+'"><input type="radio" name="q'+q.n+'" value="'+l+'" onchange="pick('+q.n+',\''+l+'\')"> '+opt+'</label>';
-    }).join('')
-    +'</div></div>';
-}).join('');
+// ── TIMER ──
+function startTimer() {
+  timerInterval = setInterval(function() {
+    timerSec++;
+    var m = Math.floor(timerSec / 60);
+    var s = timerSec % 60;
+    document.getElementById('timerVal').textContent =
+      String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }, 1000);
+}
 
-function pick(n,l){
-  answers[n]=l;
-  ['a','b','c'].forEach(function(x){
-    var el=document.getElementById('qo'+n+'_'+x);
-    if(el)el.classList.toggle('on',x===l);
+// ── BUILD NAV GRID ──
+function buildNavGrid() {
+  var grid = document.getElementById('qNavGrid');
+  grid.innerHTML = '';
+  for (var i = 1; i <= totalQ; i++) {
+    var btn = document.createElement('button');
+    btn.className = 'q-nav-btn' + (i === currentQ ? ' current' : '');
+    btn.textContent = i;
+    btn.id = 'navbtn' + i;
+    (function(n) {
+      btn.onclick = function() { goToQuestion(n); };
+    })(i);
+    grid.appendChild(btn);
+  }
+}
+
+// ── SHOW QUESTION ──
+function showQuestion(n) {
+  currentQ = n;
+  var q = QS[n - 1];
+  var area = document.getElementById('questionArea');
+  var selected = answers[n] || null;
+
+  area.innerHTML = '<div class="qblock qblock-active" id="qb' + n + '">'
+    + '<div class="q-num">Câu ' + n + ' / ' + totalQ + '</div>'
+    + '<div class="q-text" id="qtxt' + n + '">' + q.q + '</div>'
+    + '<div class="q-opts">'
+    + q.o.map(function(opt, i) {
+        var l = ['a','b','c'][i];
+        var isSel = selected === l;
+        return '<label class="q-opt' + (isSel?' on':'') + '" id="qo' + n + '_' + l + '">'
+          + '<input type="radio" name="q' + n + '" value="' + l + '"'
+          + (isSel?' checked':'')
+          + ' onchange="pick(' + n + ',\'' + l + '\')">'
+          + ' ' + opt + '</label>';
+      }).join('')
+    + '</div></div>';
+
+  // Update nav buttons
+  document.querySelectorAll('.q-nav-btn').forEach(function(b, i) {
+    b.classList.remove('current','answered');
+    var qn = i + 1;
+    if (qn === n) b.classList.add('current');
+    else if (answers[qn]) b.classList.add('answered');
   });
-  document.getElementById('qb'+n).classList.add('answered');
-  var c=Object.keys(answers).length;
-  document.getElementById('cnt').textContent=c+'/50';
-  document.getElementById('cnt2').textContent=c;
-  document.getElementById('prog').style.width=(c/50*100)+'%';
+
+  // Update position text
+  document.getElementById('qPositionTxt').textContent = 'Câu ' + n + ' / ' + totalQ;
+  document.getElementById('btnPrev').disabled = (n <= 1);
+  document.getElementById('btnNext').textContent = n < totalQ ? 'Câu sau →' : 'Xem lại & Nộp';
+
+  // Scroll to top on mobile
+  var mainContent = document.querySelector('.main-content');
+  if (mainContent) mainContent.scrollTop = 0;
+  window.scrollTo(0, 56);
+
+  // Re-run canvas protection on new question
+  setTimeout(function() { protectAllQuestions(); }, 80);
 }
 
-function goBack(){
-  if(Object.keys(answers).length>0&&!confirm('Tiến trình chưa được lưu. Thoát?'))return;
-  location.href='dashboard.html';
+function goToQuestion(n) {
+  if (n < 1 || n > totalQ) return;
+  showQuestion(n);
 }
 
-async function submitVG(){
-  var unanswered=QS.map(function(q){return q.n;}).filter(function(n){return!answers[n];});
-  hideErr('errSub');
-  if(unanswered.length>0){
-    var ul=document.getElementById('unanswered');
-    ul.style.display='block';
-    ul.innerHTML='Câu chưa trả lời: '+unanswered.map(function(n){return '<a href="#qb'+n+'" style="color:var(--navy)">'+n+'</a>';}).join(', ');
-    showErr('errSub','⚠️ Còn '+unanswered.length+' câu chưa trả lời. Vui lòng trả lời đủ.');
+function goNext() {
+  if (currentQ < totalQ) goToQuestion(currentQ + 1);
+  else {
+    // Highlight unanswered
+    var unanswered = [];
+    for (var i = 1; i <= totalQ; i++) if (!answers[i]) unanswered.push(i);
+    if (unanswered.length > 0) {
+      var first = unanswered[0];
+      goToQuestion(first);
+      document.getElementById('submitErr').textContent =
+        'Còn ' + unanswered.length + ' câu chưa trả lời. Các câu chưa làm được tô vàng.';
+      document.getElementById('submitErr').style.display = 'block';
+      unanswered.forEach(function(n) {
+        var btn = document.getElementById('navbtn'+n);
+        if (btn) btn.style.background = '#fef3c7';
+      });
+    } else {
+      submitVG();
+    }
+  }
+}
+
+function goPrev() {
+  if (currentQ > 1) goToQuestion(currentQ - 1);
+}
+
+// ── PICK ANSWER ──
+function pick(n, l) {
+  answers[n] = l;
+  ['a','b','c'].forEach(function(x) {
+    var el = document.getElementById('qo' + n + '_' + x);
+    if (el) el.classList.toggle('on', x === l);
+  });
+  var navBtn = document.getElementById('navbtn' + n);
+  if (navBtn) { navBtn.classList.remove('current'); navBtn.classList.add('answered'); }
+  // Re-add current class
+  document.querySelectorAll('.q-nav-btn').forEach(function(b,i) {
+    if (i + 1 === currentQ) b.classList.add('current');
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  var cnt = Object.keys(answers).length;
+  document.getElementById('cnt').textContent = cnt + ' / 50';
+  document.getElementById('navPrgTxt').textContent = cnt + ' / 50';
+  document.getElementById('navPrgFill').style.width = (cnt / 50 * 100) + '%';
+}
+
+// ── SUBMIT ──
+async function submitVG() {
+  var unanswered = QS.map(function(q){return q.n;}).filter(function(n){return !answers[n];});
+  var errEl = document.getElementById('submitErr');
+  if (unanswered.length > 0) {
+    errEl.textContent = 'Còn ' + unanswered.length + ' câu chưa trả lời. Vui lòng trả lời đủ trước khi nộp.';
+    errEl.style.display = 'block';
+    // Highlight unanswered in nav
+    unanswered.forEach(function(n) {
+      var btn = document.getElementById('navbtn'+n);
+      if (btn) btn.style.background = '#fef3c7';
+    });
+    goToQuestion(unanswered[0]);
     return;
   }
-  var res=await api('submitVG',{username:user.username,answers:answers});
-  if(!res.ok){showErr('errSub',res.error);return;}
-  user.vgDone=true; Session.set(user);
-  location.href='done.html?test=vg';
+  errEl.style.display = 'none';
+  clearInterval(timerInterval);
+  var res = await api('submitVG', {username: user.username, answers: answers});
+  if (!res.ok) { showErr('submitErr', res.error); errEl.style.display = 'block'; return; }
+  user.vgDone = true;
+  Session.set(user);
+  location.href = 'done.html?test=vg';
 }
+
+// ── EXIT TRACKING ──
+var confirmingExit = false;
+
+function goBack() {
+  exitCount++;
+  var confirmed = confirm(
+    'Bạn có chắc muốn thoát?\n\n' +
+    '⚠️ Lưu ý: Giáo viên sẽ ghi nhận bạn đã thoát khỏi bài thi này.\n' +
+    'Hành động này sẽ được ghi lại trong hệ thống.\n\n' +
+    'Nhấn OK để thoát, Cancel để tiếp tục làm bài.'
+  );
+  if (confirmed) {
+    clearInterval(timerInterval);
+    api('trackActivity', {
+      username: user.username,
+      testType: 'vg',
+      action: 'exit',
+      note: 'Thoat sau ' + timerSec + 'giay, da lam ' + Object.keys(answers).length + '/50 cau'
+    });
+    setTimeout(function() { location.href = 'dashboard.html'; }, 200);
+  }
+}
+
+// Track tab visibility change (user switches tab/window)
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) {
+    pageHidden = true;
+    api('trackActivity', {
+      username: user.username,
+      testType: 'vg',
+      action: 'tab_hidden',
+      note: 'Chuyen tab sau ' + timerSec + 'giay'
+    });
+  } else if (pageHidden) {
+    pageHidden = false;
+    api('trackActivity', {
+      username: user.username,
+      testType: 'vg',
+      action: 'tab_returned',
+      note: 'Quay lai tab'
+    });
+  }
+});
+
+// Block beforeunload
+window.addEventListener('beforeunload', function(e) {
+  if (!user.vgDone) {
+    e.preventDefault();
+    e.returnValue = 'Bạn có chắc muốn thoát? Tiến trình chưa được lưu.';
+    return e.returnValue;
+  }
+});
+
+// Mobile nav toggle
+function toggleMobileNav() {
+  var panel = document.getElementById('navPanel');
+  panel.classList.toggle('mobile-show');
+}
+
 </script>
 
 <script>
+
 
 // ═══════════════════════════════════════
 // CANVAS QUESTION RENDERER
@@ -739,6 +1096,7 @@ document.addEventListener('keydown', function(e) {
 window.addEventListener('load', function() {
   setTimeout(protectAllQuestions, 100);
 });
+
 </script>
 </body>
 </html>

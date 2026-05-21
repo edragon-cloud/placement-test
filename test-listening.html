@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kỹ Năng Nghe — Venus English</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -444,6 +445,33 @@ body {
 .ai-box table td { padding: 5px 8px; border-bottom: 1px solid var(--sky-dk); }
 .ai-box table td:first-child { font-weight: 700; width: 120px; color: var(--navy); white-space: nowrap; }
 
+
+.test-layout{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:calc(100vh - 56px);}
+@media(max-width:700px){.test-layout{grid-template-columns:1fr;}.nav-panel{display:none;}.nav-panel.mobile-show{display:block;}}
+.nav-panel{background:var(--white);border-right:1px solid var(--border);padding:16px 12px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+.nav-panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-lt);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.q-nav-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:16px;}
+.q-nav-btn{aspect-ratio:1;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-weight:600;background:var(--white);cursor:pointer;transition:all .15s;color:var(--text-md);display:flex;align-items:center;justify-content:center;}
+.q-nav-btn:hover{border-color:var(--navy);color:var(--navy);background:var(--sky);}
+.q-nav-btn.answered{background:var(--teal);border-color:var(--teal);color:var(--white);}
+.q-nav-btn.current{border-color:var(--navy);background:var(--navy);color:var(--white);box-shadow:0 2px 8px rgba(26,53,87,.3);}
+.nav-legend{font-size:11px;color:var(--text-lt);}
+.legend-item{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.legend-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+.timer-box{background:var(--navy);border-radius:var(--r-sm);padding:10px 12px;text-align:center;margin-bottom:14px;}
+.timer-label{font-size:10px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.timer-value{font-family:'Merriweather',serif;font-size:22px;font-weight:700;color:var(--white);letter-spacing:1px;}
+.nav-progress{margin-bottom:14px;}
+.nav-progress-bar{width:100%;height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px;}
+.nav-progress-fill{height:100%;background:var(--teal);border-radius:3px;transition:width .3s;}
+.nav-progress-txt{font-size:11px;color:var(--text-lt);display:flex;justify-content:space-between;margin-top:3px;}
+.main-content{padding:20px;max-width:780px;}
+.qblock-active{animation:slideIn .25s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.q-nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);gap:10px;}
+.part-badge{display:inline-block;background:var(--navy);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:.5px;margin-bottom:8px;}
+.mobile-nav-toggle{display:none;background:var(--navy);color:var(--white);border:none;border-radius:var(--r-sm);padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;}
+@media(max-width:700px){.mobile-nav-toggle{display:inline-flex;}}
 </style>
 <script>
 const GAS_URL='https://script.google.com/macros/s/AKfycbwwx6KoClB_kwvEOC4-5lQcQgh6J8n0xm1x3SI33EHxzhc5PXugKlrVsNSdUnDjZDVZ/exec';
@@ -456,25 +484,61 @@ function hideErr(id){var el=document.getElementById(id);if(el)el.style.display='
 </head>
 <body>
 <div id="ov" style="display:none"><div class="spinner"></div><p id="ovMsg">Đang nộp bài...</p></div>
-<nav class="nav">
-  <button class="btn btn-ghost btn-sm" onclick="goBack()">← Quay lại</button>
+
+<nav class="nav" style="position:sticky;top:0;z-index:200">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="btn btn-ghost btn-sm" onclick="goBack()">← Thoát</button>
+    <button class="mobile-nav-toggle" onclick="toggleMobileNav()">☰ Số câu</button>
+  </div>
   <div class="nav-brand"><div class="nav-brand-dot"></div>Kỹ Năng Nghe</div>
-  <div class="nav-r"><span class="txt-sm" id="cnt">0/24</span></div>
+  <div class="nav-r"><span class="txt-sm" id="cnt" style="min-width:50px;text-align:right">0 / 24</span></div>
 </nav>
-<div class="wrap">
-  <div class="alert al-warn show" style="margin-bottom:16px">🎧 Nghe từng đoạn audio rồi trả lời câu hỏi. Mỗi đoạn có thể nghe lại tối đa 3 lần. Kết quả không hiển thị ngay — giáo viên tổng hợp sau.</div>
-  <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
-  <div id="parts"></div>
-  <div id="errSub" class="al-error" style="display:none"></div>
-  <div id="unanswered" style="display:none;font-size:12px;color:var(--text-lt);margin-bottom:10px"></div>
-  <div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-    <span class="txt-sm">Đã trả lời: <strong id="cnt2">0</strong> / 24</span>
-    <button class="btn btn-primary" onclick="submitLis()">Nộp bài →</button>
+
+<div class="test-layout">
+  <!-- LEFT NAV -->
+  <div class="nav-panel" id="navPanel">
+    <div class="timer-box"><div class="timer-label">Thời gian</div><div class="timer-value" id="timerVal">00:00</div></div>
+    <div class="nav-progress">
+      <div class="nav-progress-txt"><span>Đã trả lời</span><span id="navPrgTxt">0 / 24</span></div>
+      <div class="nav-progress-bar"><div class="nav-progress-fill" id="navPrgFill" style="width:0%"></div></div>
+    </div>
+    <div class="nav-panel-title">Câu hỏi</div>
+    <div class="q-nav-grid" id="qNavGrid"></div>
+    <div class="nav-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div><span>Đã trả lời</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--navy)"></div><span>Câu hiện tại</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--white);border:1.5px solid var(--border)"></div><span>Chưa trả lời</span></div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:16px" onclick="submitListening()">Nộp bài →</button>
+  </div>
+
+  <!-- RIGHT CONTENT -->
+  <div class="main-content">
+    <div class="alert al-warn show" style="margin-bottom:16px">
+      🎧 Nghe từng đoạn audio rồi trả lời câu hỏi. Mỗi đoạn có thể nghe lại tối đa 3 lần. Kết quả không hiển thị ngay — giáo viên tổng hợp sau.
+    </div>
+    <div id="questionArea"></div>
+    <div class="q-nav-row">
+      <button class="btn btn-ghost" id="btnPrev" onclick="goPrev()">← Câu trước</button>
+      <span class="txt-sm" id="qPositionTxt" style="color:var(--text-lt)">Câu 1 / 24</span>
+      <button class="btn btn-primary btn-sm" id="btnNext" onclick="goNext()">Câu sau →</button>
+    </div>
+    <div id="submitErr" class="al-error" style="display:none;margin-top:16px"></div>
   </div>
 </div>
+
 <script>
+
 var user = Session.require();
 if (user && user.listeningDone) location.href = 'dashboard.html';
+
+var answers = {};
+var plays = {};
+var currentQ = 1;
+var totalQ = 24;
+var timerSec = 0;
+var timerInterval = null;
+var pageHidden = false;
 
 var AUDIO = {1:'audio/part1.mp3',2:'audio/part2.mp3',3:'audio/part3.mp3',4:'audio/part4.mp3',5:'audio/part5.mp3',6:'audio/part6.mp3'};
 var PARTS = [
@@ -516,75 +580,181 @@ var PARTS = [
   ]},
 ];
 
-var answers = {};
-var plays = {};
+// Track all questions flat
+var ALL_QS = [];
+PARTS.forEach(function(pt){ pt.qs.forEach(function(q){ q.part = pt.p; ALL_QS.push(q); }); });
 
-var html = '';
-PARTS.forEach(function(pt){
-  html += '<div class="audio-wrap">'
-    +'<div class="audio-label">'+pt.lbl+'</div>'
-    +'<audio controls id="aud'+pt.p+'" src="'+AUDIO[pt.p]+'" onplay="trackPlay('+pt.p+')"></audio>'
-    +'<div class="audio-plays" id="pi'+pt.p+'">Còn nghe được 3 lần</div>'
-    +'</div>';
-  pt.qs.forEach(function(q){
-    html += '<div class="qblock" id="qb'+q.n+'">'
-      +'<div class="q-num">Câu '+q.n+'</div>'
-      +'<div class="q-text">'+q.q+'</div>'
-      +'<div class="q-opts">'
-      +q.o.map(function(opt,i){
-        var l=['a','b','c','d'][i];
-        return '<label class="q-opt" id="qo'+q.n+'_'+l+'"><input type="radio" name="q'+q.n+'" value="'+l+'" onchange="pick('+q.n+',\''+l+'\')"> '+opt+'</label>';
-      }).join('')
-      +'</div></div>';
-  });
-});
-document.getElementById('parts').innerHTML = html;
+// ── Track enter ──
+api('trackActivity', {username:user.username, testType:'listening', action:'enter', note:'Start session'});
 
-function trackPlay(p){
-  plays[p]=(plays[p]||0)+1;
-  var left=Math.max(0,3-plays[p]);
-  var el=document.getElementById('pi'+p);
-  if(el)el.textContent=left>0?'Còn nghe được '+left+' lần':'Đã nghe đủ 3 lần';
+// ── INIT ──
+buildNavGrid();
+showQuestion(1);
+startTimer();
+
+// ── TIMER ──
+function startTimer() {
+  timerInterval = setInterval(function() {
+    timerSec++;
+    var m = Math.floor(timerSec/60), s = timerSec%60;
+    document.getElementById('timerVal').textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }, 1000);
 }
 
-function pick(n,l){
+// ── BUILD NAV GRID ──
+function buildNavGrid() {
+  var grid = document.getElementById('qNavGrid');
+  grid.innerHTML = '';
+  ALL_QS.forEach(function(q) {
+    var btn = document.createElement('button');
+    btn.className = 'q-nav-btn' + (q.n === currentQ ? ' current' : '');
+    btn.textContent = q.n;
+    btn.id = 'navbtn' + q.n;
+    btn.title = 'Part ' + q.part;
+    (function(n){ btn.onclick = function(){ goToQuestion(n); }; })(q.n);
+    grid.appendChild(btn);
+  });
+}
+
+// ── SHOW QUESTION ──
+function showQuestion(n) {
+  currentQ = n;
+  var q = ALL_QS.find(function(x){ return x.n===n; });
+  if (!q) return;
+  var pt = PARTS.find(function(p){ return p.p===q.part; });
+  var area = document.getElementById('questionArea');
+  var selected = answers[n]||null;
+  var playCount = plays[q.part]||0;
+  var playsLeft = Math.max(0,3-playCount);
+
+  var html = '<div class="qblock qblock-active">'
+    // Audio player for this part
+    + '<div class="audio-wrap" style="margin-bottom:14px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center">'
+    + '<div><div class="audio-label">Part ' + q.part + ' — Câu ' + pt.qs[0].n + '–' + pt.qs[pt.qs.length-1].n + '</div>'
+    + '<div class="audio-title">' + pt.lbl + '</div></div>'
+    + '<span style="font-size:11px;opacity:.75" id="playsLeft_' + q.part + '">'
+    + (playsLeft>0?'Còn nghe '+playsLeft+' lần':'Đã hết lượt nghe') + '</span>'
+    + '</div>'
+    + '<audio controls id="aud'+q.part+'" src="'+AUDIO[q.part]+'" onplay="trackPlay('+q.part+')" style="width:100%;margin-top:8px;height:36px"></audio>'
+    + '</div>'
+    // Question
+    + '<div class="q-num">Câu ' + n + ' / ' + totalQ + ' · Part ' + q.part + '</div>'
+    + '<div class="q-text" id="qtxt' + n + '">' + q.q + '</div>'
+    + '<div class="q-opts">'
+    + q.o.map(function(opt,i) {
+        var l=['a','b','c','d'][i];
+        var isSel = selected===l;
+        return '<label class="q-opt'+(isSel?' on':'')+'" id="qo'+n+'_'+l+'">'
+          +'<input type="radio" name="q'+n+'" value="'+l+'"'+(isSel?' checked':'')
+          +' onchange="pick('+n+',\''+l+'\')">'
+          +' '+opt+'</label>';
+      }).join('')
+    + '</div></div>';
+
+  area.innerHTML = html;
+
+  // Update nav buttons
+  document.querySelectorAll('.q-nav-btn').forEach(function(b,i) {
+    var qn = ALL_QS[i].n;
+    b.classList.remove('current','answered');
+    if (qn===n) b.classList.add('current');
+    else if (answers[qn]) b.classList.add('answered');
+  });
+
+  document.getElementById('qPositionTxt').textContent = 'Câu '+n+' / '+totalQ;
+  document.getElementById('btnPrev').disabled = (n<=1);
+  document.getElementById('btnNext').textContent = n<totalQ?'Câu sau →':'Xem lại & Nộp';
+  window.scrollTo(0,56);
+  setTimeout(function(){ protectAllQuestions(); },80);
+}
+
+function goToQuestion(n) { if(n>=1&&n<=totalQ) showQuestion(n); }
+function goNext() {
+  if(currentQ<totalQ){goToQuestion(currentQ+1);return;}
+  var una=ALL_QS.map(function(q){return q.n;}).filter(function(n){return!answers[n];});
+  if(una.length>0){
+    document.getElementById('submitErr').textContent='Còn '+una.length+' câu chưa trả lời.';
+    document.getElementById('submitErr').style.display='block';
+    una.forEach(function(n){var b=document.getElementById('navbtn'+n);if(b)b.style.background='#fef3c7';});
+    goToQuestion(una[0]);
+  }else{submitListening();}
+}
+function goPrev(){if(currentQ>1)goToQuestion(currentQ-1);}
+
+function trackPlay(p) {
+  plays[p]=(plays[p]||0)+1;
+  var left=Math.max(0,3-plays[p]);
+  var el=document.getElementById('playsLeft_'+p);
+  if(el)el.textContent=left>0?'Còn nghe '+left+' lần':'Đã hết lượt nghe';
+}
+
+function pick(n,l) {
   answers[n]=l;
   ['a','b','c','d'].forEach(function(x){
     var el=document.getElementById('qo'+n+'_'+x);
     if(el)el.classList.toggle('on',x===l);
   });
-  document.getElementById('qb'+n).classList.add('answered');
-  var c=Object.keys(answers).length;
-  document.getElementById('cnt').textContent=c+'/24';
-  document.getElementById('cnt2').textContent=c;
-  document.getElementById('prog').style.width=(c/24*100)+'%';
+  var btn=document.getElementById('navbtn'+n);
+  if(btn){btn.style.background='';btn.classList.remove('current');btn.classList.add('answered');}
+  document.querySelectorAll('.q-nav-btn').forEach(function(b,i){if(ALL_QS[i].n===currentQ)b.classList.add('current');});
+  updateProgress();
 }
 
-function goBack(){
-  if(Object.keys(answers).length>0&&!confirm('Tiến trình chưa được lưu. Thoát?'))return;
-  location.href='dashboard.html';
+function updateProgress() {
+  var cnt=Object.keys(answers).length;
+  document.getElementById('cnt').textContent=cnt+' / 24';
+  document.getElementById('navPrgTxt').textContent=cnt+' / 24';
+  document.getElementById('navPrgFill').style.width=(cnt/24*100)+'%';
 }
 
-async function submitLis(){
-  var total=[];
-  PARTS.forEach(function(pt){pt.qs.forEach(function(q){total.push(q.n);});});
-  var unanswered=total.filter(function(n){return!answers[n];});
-  hideErr('errSub');
-  if(unanswered.length>0){
-    var ul=document.getElementById('unanswered');
-    ul.style.display='block';
-    ul.innerHTML='Câu chưa trả lời: '+unanswered.map(function(n){return '<a href="#qb'+n+'" style="color:var(--navy)">'+n+'</a>';}).join(', ');
-    showErr('errSub','⚠️ Còn '+unanswered.length+' câu chưa trả lời.');
-    return;
+async function submitListening() {
+  var una=ALL_QS.map(function(q){return q.n;}).filter(function(n){return!answers[n];});
+  var errEl=document.getElementById('submitErr');
+  if(una.length>0){
+    errEl.textContent='Còn '+una.length+' câu chưa trả lời. Vui lòng trả lời đủ.';
+    errEl.style.display='block';
+    una.forEach(function(n){var b=document.getElementById('navbtn'+n);if(b)b.style.background='#fef3c7';});
+    goToQuestion(una[0]); return;
   }
+  errEl.style.display='none';
+  clearInterval(timerInterval);
   var res=await api('submitListening',{username:user.username,answers:answers});
-  if(!res.ok){showErr('errSub',res.error);return;}
-  user.listeningDone=true;Session.set(user);
+  if(!res.ok){errEl.textContent=res.error;errEl.style.display='block';return;}
+  user.listeningDone=true; Session.set(user);
   location.href='done.html?test=listening';
 }
-</script>
 
+// ── EXIT TRACKING ──
+function goBack() {
+  var confirmed=confirm('Bạn có chắc muốn thoát?\n\n⚠️ Giáo viên sẽ ghi nhận bạn đã thoát khỏi bài thi này.\nHành động này sẽ được ghi lại trong hệ thống.\n\nNhấn OK để thoát, Cancel để tiếp tục làm bài.');
+  if(confirmed){
+    clearInterval(timerInterval);
+    api('trackActivity',{username:user.username,testType:'listening',action:'exit',
+      note:'Thoat sau '+timerSec+'giay, da lam '+Object.keys(answers).length+'/24 cau'});
+    setTimeout(function(){location.href='dashboard.html';},200);
+  }
+}
+
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){
+    pageHidden=true;
+    api('trackActivity',{username:user.username,testType:'listening',action:'tab_hidden',note:'Chuyen tab sau '+timerSec+'giay'});
+  }else if(pageHidden){
+    pageHidden=false;
+    api('trackActivity',{username:user.username,testType:'listening',action:'tab_returned',note:'Quay lai tab'});
+  }
+});
+
+window.addEventListener('beforeunload',function(e){
+  if(!user.listeningDone){e.preventDefault();e.returnValue='Bạn có chắc muốn thoát?';return e.returnValue;}
+});
+
+function toggleMobileNav(){document.getElementById('navPanel').classList.toggle('mobile-show');}
+
+</script>
 <script>
+
 
 // ═══════════════════════════════════════
 // CANVAS QUESTION RENDERER
@@ -745,6 +915,7 @@ document.addEventListener('keydown', function(e) {
 window.addEventListener('load', function() {
   setTimeout(protectAllQuestions, 100);
 });
+
 </script>
 </body>
 </html>

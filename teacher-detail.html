@@ -667,35 +667,118 @@ async function aiGrade() {
   var k = getKey(); if(!k) return;
   var essay = (detailData && detailData.writing) ? detailData.writing.essay : '';
   var topic = (detailData && detailData.writing) ? detailData.writing.topic : '';
+  var student = (detailData && detailData.student) ? detailData.student : {};
   var box = document.getElementById('aiBox');
   box.style.display = 'block';
-  box.innerHTML = '<div class="spinner" style="margin:8px auto"></div>';
+  box.innerHTML = '<div class="spinner" style="margin:8px auto"></div><p style="text-align:center;font-size:13px;color:var(--text-lt)">AI đang phân tích bài viết theo 4 tiêu chí IELTS...</p>';
+
+  var PROMPT = `You are an expert IELTS examiner conducting a placement test assessment. Analyze this student essay thoroughly according to official IELTS Writing band descriptors.
+
+STUDENT: ${student.fullName || 'Student'}
+TOPIC: "${topic}"
+TARGET BAND: ${student.targetBand || 'Not specified'}
+
+ESSAY:
+"""
+${essay}
+"""
+
+Provide a DETAILED assessment following EXACTLY this JSON structure. Write all comments in Vietnamese. Be specific, cite actual sentences/phrases from the essay as evidence.
+
+{
+  "band": "X.X",
+  "task": {
+    "score": "X.X",
+    "comment": "Nhận xét chi tiết về việc hoàn thành yêu cầu đề bài: thí sinh có trả lời đủ các yêu cầu không? Phần nào bỏ sót? Ý tưởng có phát triển đầy đủ không?",
+    "errors": ["Lỗi cụ thể 1 (trích dẫn từ bài)", "Lỗi cụ thể 2"]
+  },
+  "coherence": {
+    "score": "X.X",
+    "comment": "Nhận xét về cấu trúc đoạn văn, liên kết ý, sử dụng từ nối. Có câu chủ đề rõ ràng không? Các ý có logic không?",
+    "errors": ["Lỗi cụ thể 1", "Lỗi cụ thể 2"]
+  },
+  "vocabulary": {
+    "score": "X.X",
+    "comment": "Nhận xét về phạm vi từ vựng, tính chính xác, collocations. Trích dẫn cả điểm tốt lẫn lỗi sai.",
+    "errors": ["Từ/cụm dùng sai 1 → sửa thành", "Từ/cụm dùng sai 2 → sửa thành"]
+  },
+  "grammar": {
+    "score": "X.X",
+    "comment": "Nhận xét về độ đa dạng và chính xác cấu trúc câu. Trích dẫn lỗi cụ thể.",
+    "errors": ["Câu sai 1 → sửa thành", "Câu sai 2 → sửa thành"]
+  },
+  "strengths": ["Điểm mạnh 1", "Điểm mạnh 2"],
+  "suggestions": [
+    "Gợi ý cải thiện cụ thể 1 (hành động rõ ràng)",
+    "Gợi ý cải thiện cụ thể 2",
+    "Gợi ý cải thiện cụ thể 3"
+  ],
+  "overall_comment": "Đánh giá tổng quan về năng lực viết của thí sinh và khuyến nghị lộ trình học tập cụ thể."
+}
+
+IMPORTANT: Respond ONLY with valid JSON. No markdown. No preamble. Band scores must be in format like "4.0", "5.5", "6.0" etc.`;
 
   try {
     var r = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514', max_tokens:1200,
-        messages:[{role:'user',content:'You are an IELTS writing examiner. Evaluate this placement test essay.\nTopic: "'+topic+'"\n\nEssay:\n"""\n'+essay+'\n"""\n\nRespond ONLY valid JSON (no markdown):\n{"band":"5.5","task":"...","coherence":"...","vocabulary":"...","grammar":"...","suggestions":["...","...","..."]}'}]
-      })
+      body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:2000, messages:[{role:'user',content:PROMPT}]})
     });
     var d = await r.json();
     var raw = (d.content&&d.content[0]&&d.content[0].text)||'{}';
     var j = JSON.parse(raw.replace(/```json|```/g,'').trim());
-    box.innerHTML = '<strong style="font-size:15px;color:var(--navy)">Band ước tính: '+j.band+'</strong>'
-      +'<table style="margin-top:8px">'
-      +'<tr><td>Task Achievement</td><td>'+j.task+'</td></tr>'
-      +'<tr><td>Coherence</td><td>'+j.coherence+'</td></tr>'
-      +'<tr><td>Vocabulary</td><td>'+j.vocabulary+'</td></tr>'
-      +'<tr><td>Grammar</td><td>'+j.grammar+'</td></tr>'
-      +'</table>'
-      +'<div style="margin-top:10px"><strong>Gợi ý:</strong><ul style="padding-left:18px;margin-top:4px">'
-      +j.suggestions.map(function(s){return '<li>'+s+'</li>';}).join('')
-      +'</ul></div>'
-      +'<button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="applyBand(\''+j.band+'\')">Dùng band '+j.band+'</button>';
+
+    var html = '<div style="margin-bottom:12px;padding:10px 14px;background:var(--navy);border-radius:var(--r-sm);color:#fff;display:flex;justify-content:space-between;align-items:center">'
+      + '<strong style="font-size:17px">Band ước tính: ' + j.band + '</strong>'
+      + '<button class="btn btn-gold btn-sm" onclick="applyBand(\'' + j.band + '\')" style="font-size:12px">Dùng band này</button>'
+      + '</div>';
+
+    var criteria = [
+      {key:'task',      label:'Task Achievement — Hoàn thành nhiệm vụ'},
+      {key:'coherence', label:'Coherence & Cohesion — Mạch văn & Liên kết'},
+      {key:'vocabulary',label:'Lexical Resource — Từ vựng'},
+      {key:'grammar',   label:'Grammatical Range — Ngữ pháp'},
+    ];
+    criteria.forEach(function(c) {
+      var data = j[c.key] || {};
+      html += '<div style="margin-bottom:12px;padding:12px;background:var(--cream);border-radius:var(--r-sm);border-left:3px solid var(--teal)">'
+        + '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'
+        + '<strong style="font-size:13px;color:var(--navy)">' + c.label + '</strong>'
+        + '<span style="background:var(--teal);color:#fff;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:700">' + (data.score||'--') + '</span>'
+        + '</div>'
+        + '<p style="font-size:13px;line-height:1.6;margin-bottom:6px">' + (data.comment||'') + '</p>';
+      if (data.errors && data.errors.length) {
+        html += '<ul style="font-size:12px;color:var(--red);padding-left:16px;margin:0">'
+          + data.errors.map(function(e){return '<li>' + e + '</li>';}).join('') + '</ul>';
+      }
+      html += '</div>';
+    });
+
+    if (j.strengths && j.strengths.length) {
+      html += '<div style="padding:10px 14px;background:#f0fdf4;border-radius:var(--r-sm);margin-bottom:10px">'
+        + '<strong style="font-size:13px;color:var(--green)">Điểm mạnh:</strong>'
+        + '<ul style="font-size:13px;padding-left:16px;margin:4px 0 0">'
+        + j.strengths.map(function(s){return '<li>' + s + '</li>';}).join('') + '</ul></div>';
+    }
+
+    if (j.suggestions && j.suggestions.length) {
+      html += '<div style="padding:10px 14px;background:var(--sky);border-radius:var(--r-sm);margin-bottom:10px">'
+        + '<strong style="font-size:13px;color:var(--navy)">Gợi ý cải thiện:</strong>'
+        + '<ol style="font-size:13px;padding-left:16px;margin:4px 0 0">'
+        + j.suggestions.map(function(s){return '<li>' + s + '</li>';}).join('') + '</ol></div>';
+    }
+
+    if (j.overall_comment) {
+      html += '<div style="padding:10px 14px;background:var(--amber-lt);border-radius:var(--r-sm);font-size:13px;line-height:1.6">'
+        + '<strong>Đánh giá tổng quan:</strong> ' + j.overall_comment + '</div>';
+    }
+
+    box.innerHTML = html;
+    // Auto fill comment field
+    document.getElementById('wCmt').value = (j.overall_comment || '') + '\n\nTask: ' + (j.task&&j.task.comment||'') + '\nVocabulary: ' + (j.vocabulary&&j.vocabulary.comment||'') + '\nGrammar: ' + (j.grammar&&j.grammar.comment||'');
+
   } catch(e) {
-    box.innerHTML = '<span style="color:var(--red)">Lỗi: '+e.message+'</span>';
+    box.innerHTML = '<div style="color:var(--red);padding:10px">Lỗi AI: ' + e.message + '<br><small>Kiểm tra API key và thử lại.</small></div>';
   }
 }
 
